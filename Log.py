@@ -57,6 +57,9 @@ choices = (' ')
 var = tkinter.StringVar(root)
 var.set('')
 param_options = tkinter.OptionMenu(root,var,*choices)
+def callback(*args):
+    plot()
+var.trace('w',callback)
 
 log_header = []
 log_df = pd.DataFrame(data={'x':[1,2,3],'y':[1,1,1]})
