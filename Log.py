@@ -12,29 +12,37 @@ import numpy as np
 import pandas as pd
 from scipy.stats import linregress
 from matplotlib.widgets import SpanSelector
-#######################################################
+
+################### Tkinter Set-up ######################
+#    
 root = tkinter.Tk()
 root.wm_title("Log Analysis")
-#######################################################
+
+################### Figure Set-up ######################
+#                   --------------
 fig = Figure(figsize=(5, 4), dpi=100)
 ax = fig.add_subplot(111)
-ax.scatter([1,1,1,1,1,1,1,1,1,1.5,2,2.5,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,6],
-            [5,4.5,4,3.5,3,2.5,2,1.5,1,3,3,3,5,4.5,4,3.5,3,2.5,2,1.5,1,4,3,2.5,2,1.5,1,1])
-#######################################################
 
 canvas = FigureCanvasTkAgg(fig, master=root)  # A tk.DrawingArea.
 canvas.draw()
-canvas.get_tk_widget().grid(row=3,column=3)#,rowspan=3,columnspan=5)
+canvas.get_tk_widget().grid(row=3,column=3)
 
 toolbarFrame= tkinter.Frame(master=root)
 toolbarFrame.grid(row=8,column=3,columnspan=5)
 
 toolbar = NavigationToolbar2Tk(canvas, toolbarFrame)
 toolbar.update()
-#canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
+
+################### Global Variables ######################
+#   
 
 file_loaded = False
-########################################################
+line_plot = False
+log_header = []
+log_df = pd.DataFrame(data={'x':[1,2,3],'y':[1,1,1]})
+
+################ Key Press for Some Reason #################
+#  
 
 def on_key_press(event):
     print("you pressed {}".format(event.key))
@@ -42,7 +50,8 @@ def on_key_press(event):
 
 canvas.mpl_connect("key_press_event", on_key_press)
 
-#------------------Quit The Window------------------------#
+##################### Quit The Window ######################
+#     
 
 def _quit():
     root.quit()     # stops mainloop
@@ -51,18 +60,30 @@ def _quit():
 
 quit_button = tkinter.Button(master=root, text="Quit", command=_quit)
 
-#-------------Read file and update param options---------------------#
+################### Update param options ###################
+#                  ----------------------
 
-choices = (' ')
+
+data_choices = (' ')
 var = tkinter.StringVar(root)
 var.set('')
-param_options = tkinter.OptionMenu(root,var,*choices)
+param_options = tkinter.OptionMenu(root,var,*data_choices)
 def callback(*args):
     plot()
 var.trace('w',callback)
 
-log_header = []
-log_df = pd.DataFrame(data={'x':[1,2,3],'y':[1,1,1]})
+################### Update plotting options ###################
+#    
+
+plot_choices = ('Line','Scatter','Histogram')
+plot_var = tkinter.StringVar(root)
+plot_var.set('Line')
+plot_options = tkinter.OptionMenu(root,plot_var,*plot_choices)
+plot_var.trace('w',callback)
+
+
+######################## Read log file ########################
+#                       ---------------
 
 def read_log():
     global log_header
@@ -113,25 +134,43 @@ def read_log():
 
 file_button = tkinter.Button(master=root, text="Pick a File", command=read_log)
 
-#------------------Plot the data----------------------#
+#################### Plot the data ######################
+#     
     
 def plot():
     global file_loaded
+    global line_plot
     if file_loaded:
         ax.cla()
         xdata = log_df['Step']
         ydata = log_df[var.get()]
-        ax.plot(xdata,ydata)
-        ax.set_title(var.get()+' vs. Step')
-        ax.set_xlabel('Step')
-        ax.set_ylabel(var.get())
+        if plot_var.get() == 'Line':
+            ax.plot(xdata,ydata)
+            ax.set_title(var.get()+' vs. Step')
+            ax.set_xlabel('Step')
+            ax.set_ylabel(var.get())
+            line_plot = True
+        elif plot_var.get() == 'Scatter':
+            ax.scatter(xdata,ydata)
+            ax.set_title(var.get()+' vs. Step')
+            ax.set_xlabel('Step')
+            ax.set_ylabel(var.get())
+            line_plot = True
+        else:
+            ax.hist(ydata,bins = 100)
+            line_plot = False
+            ax.set_title(var.get())
+            ax.set_xlabel(var.get())
+            ax.set_ylabel('Freq')
         canvas.draw()
 
-plot_button = tkinter.Button(root,text="Plot",command=plot)
+################### Span Selector ######################
+#     
 
-#------------------------Span Selector---------------------#
 def onselect(xmin, xmax):
-    if file_loaded:
+    global file_loaded
+    global line_plot
+    if file_loaded and line_plot:
         plot()
         indmin, indmax = np.searchsorted(log_df['Step'], (xmin, xmax))
         indmax = min(len(log_df['Step']) - 1, indmax)
@@ -141,9 +180,6 @@ def onselect(xmin, xmax):
         slope, intercept, r, p, std = linregress(thisx,thisy)
         print(slope)
         ax.plot(thisx,thisx*slope+intercept)
-        #line2.set_data(thisx, thisy)
-        #ax2.set_xlim(thisx[0], thisx[-1])
-        #ax2.set_ylim(thisy.min(), thisy.max())
         fig.canvas.draw()
 
 # Set useblit=True on most backends for enhanced performance.
@@ -151,16 +187,17 @@ span = SpanSelector(ax, onselect, 'horizontal', useblit=True,
                     rectprops=dict(alpha=0.5, facecolor='red'))
 #-------------------Display Labels---------------------#
 
-ave_label = tkinter.Label(root,text='Average:')
+#ave_label = tkinter.Label(root,text='Average:')
 #slope_label = tkinter.Label(root,text='Slope:')
 
-#----------------------Placements-----------------------#
+##################### Placements ########################
+#   
 
-plot_button.grid(row=6,column=5)
+plot_options.grid(row=6,column=5)
 quit_button.grid(row=7,column=3)
 param_options.grid(row=6,column=1)
 file_button.grid(row=6,column=3)
-ave_label.grid(row=6,column=2)
+#ave_label.grid(row=6,column=2)
 #slope_label.pack(side=tkinter.RIGHT)
 
 #------------------------------------------------------#
