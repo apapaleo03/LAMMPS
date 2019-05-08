@@ -3,16 +3,16 @@
 
 import tkinter
 from tkinter.filedialog import askdirectory
-from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
-# Implement the default Matplotlib key bindings.
-from matplotlib.backend_bases import key_press_handler
-from matplotlib.figure import Figure
 import numpy as np
 import pandas as pd
-from scipy.stats import linregress
-from matplotlib.widgets import SpanSelector
-from os import listdir
 import re
+from os import listdir
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.backend_bases import key_press_handler
+from matplotlib.figure import Figure
+from matplotlib.widgets import SpanSelector
+from scipy.stats import linregress
+
 
 ################### Tkinter Set-up ######################
 #                   --------------
@@ -27,7 +27,7 @@ fig = Figure(figsize=(10, 4), dpi=100)
 ax = fig.add_subplot(121)
 ax2 = fig.add_subplot(122)
 
-canvas = FigureCanvasTkAgg(fig, master=root)  # A tk.DrawingArea.
+canvas = FigureCanvasTkAgg(fig, master=root) 
 canvas.draw()
 canvas.get_tk_widget().grid(row=3,column=3)
 
@@ -61,9 +61,8 @@ canvas.mpl_connect("key_press_event", on_key_press)
 #                    -----------------
 
 def _quit():
-    root.quit()     # stops mainloop
-    root.destroy()  # this is necessary on Windows to prevent
-                    # Fatal Python Error: PyEval_RestoreThread: NULL tstate
+    root.quit()     
+    root.destroy()  
 
 quit_button = tkinter.Button(master=root, text="Quit", command=_quit)
 
@@ -77,7 +76,7 @@ param_options = tkinter.OptionMenu(root,var,*choices)
 def callback(*args):
     global curr_temp
     plot()
-    orient,temp = [s for s in re.findall(r'-?\d+\.?\d*', var.get())]
+    orient,temp,run = [s for s in re.findall(r'-?\d+\.?\d*', var.get())]
     curr_temp = -1*float(temp)
 var.trace('w',callback)
 
@@ -89,7 +88,7 @@ def read_lengths():
     file_loaded = True
     directory = askdirectory()
     files = sorted(listdir(directory))
-    orient,temp = [s for s in re.findall(r'-?\d+\.?\d*', files[0])]
+    orient,temp ,run= [s for s in re.findall(r'-?\d+\.?\d*', files[0])]
     curr_temp = -1*float(temp)
 
     var.set(files[0])
@@ -148,10 +147,6 @@ def onselect(xmin, xmax):
             temp_axis.append(curr_temp)
         ax2.cla()
         ax2.scatter(temp_axis,slope_axis)
-
-        #line2.set_data(thisx, thisy)
-        #ax2.set_xlim(thisx[0], thisx[-1])
-        #ax2.set_ylim(thisy.min(), thisy.max())
         fig.canvas.draw()
 
 # Set useblit=True on most backends for enhanced performance.
@@ -172,5 +167,3 @@ file_button.grid(row=6,column=3)
             
 
 tkinter.mainloop()
-# If you put root.destroy() here, it will cause an error if the window is
-# closed with the window manager.

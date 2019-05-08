@@ -2,15 +2,13 @@
 ####################################################################
 
 import tkinter
-from tkinter.filedialog import askopenfilename
-from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg, NavigationToolbar2Tk)
-# Implement the default Matplotlib key bindings.
-from matplotlib.backend_bases import key_press_handler
-from matplotlib.figure import Figure
 import numpy as np
 import pandas as pd
 from scipy.stats import linregress
+from tkinter.filedialog import askopenfilename
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.backend_bases import key_press_handler
+from matplotlib.figure import Figure
 from matplotlib.widgets import SpanSelector
 
 ################### Tkinter Set-up ######################
@@ -23,9 +21,9 @@ root.wm_title("Log Analysis")
 fig = Figure(figsize=(5, 4), dpi=100)
 ax = fig.add_subplot(111)
 
-canvas = FigureCanvasTkAgg(fig, master=root)  # A tk.DrawingArea.
+canvas = FigureCanvasTkAgg(fig, master=root)  
 canvas.draw()
-canvas.get_tk_widget().grid(row=3,column=3)
+canvas.get_tk_widget().grid(row=0,column=3,sticky=tkinter.N+tkinter.S+tkinter.E+tkinter.W)
 
 toolbarFrame= tkinter.Frame(master=root)
 toolbarFrame.grid(row=8,column=3,columnspan=5)
@@ -54,9 +52,8 @@ canvas.mpl_connect("key_press_event", on_key_press)
 #     
 
 def _quit():
-    root.quit()     # stops mainloop
-    root.destroy()  # this is necessary on Windows to prevent
-                    # Fatal Python Error: PyEval_RestoreThread: NULL tstate
+    root.quit()     
+    root.destroy() 
 
 quit_button = tkinter.Button(master=root, text="Quit", command=_quit)
 
@@ -182,7 +179,7 @@ def onselect(xmin, xmax):
         ax.plot(thisx,thisx*slope+intercept)
         fig.canvas.draw()
 
-# Set useblit=True on most backends for enhanced performance.
+
 span = SpanSelector(ax, onselect, 'horizontal', useblit=True,
                     rectprops=dict(alpha=0.5, facecolor='red'))
 #-------------------Display Labels---------------------#
@@ -203,8 +200,6 @@ file_button.grid(row=6,column=3)
 #------------------------------------------------------#
 
 
-            
+root.resizable(width=tkinter.TRUE, height=tkinter.TRUE)          
 
 tkinter.mainloop()
-# If you put root.destroy() here, it will cause an error if the window is
-# closed with the window manager.
