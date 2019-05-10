@@ -128,10 +128,6 @@ plot_button = tkinter.Button(root,text="Plot",command=plot)
 #                   -------------
 
 def onselect(xmin, xmax):
-    #global xdata
-    #global ydata
-    #global fileName
-    #global data
     if file_loaded:
         plot()
         indmin, indmax = np.searchsorted(xdata, (xmin, xmax))
@@ -140,7 +136,6 @@ def onselect(xmin, xmax):
         thisx = xdata[indmin:indmax]
         thisy = ydata[indmin:indmax]
         slope, intercept, r, p, std = linregress(thisx,thisy)
-        print(slope)
         ax.plot(thisx,thisx*slope+intercept)
         data[fileName] = [curr_temp,slope*(-1)]
         print(data)
