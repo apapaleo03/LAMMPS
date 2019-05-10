@@ -42,12 +42,14 @@ toolbar.update()
 #                   --------------
 
 file_loaded = False
+fileName = ''
 directory = ''
 xdata = 0
 ydata = 0
 curr_temp = 0
 temp_axis = []
 slope_axis = []
+data = {}
 
 ################ Key Press for Some Reason #################
 #                --------------------------
@@ -75,6 +77,8 @@ var.set('')
 param_options = tkinter.OptionMenu(root,var,*choices)
 def callback(*args):
     global curr_temp
+    global fileName
+    fileName = var.get()
     plot()
     orient,temp,run = [s for s in re.findall(r'-?\d+\.?\d*', var.get())]
     curr_temp = -1*float(temp)
@@ -124,11 +128,10 @@ plot_button = tkinter.Button(root,text="Plot",command=plot)
 #                   -------------
 
 def onselect(xmin, xmax):
-    global xdata
-    global ydata
-    global temp_axis
-    global slope_axis
-    global curr_index
+    #global xdata
+    #global ydata
+    #global fileName
+    #global data
     if file_loaded:
         plot()
         indmin, indmax = np.searchsorted(xdata, (xmin, xmax))
@@ -139,14 +142,12 @@ def onselect(xmin, xmax):
         slope, intercept, r, p, std = linregress(thisx,thisy)
         print(slope)
         ax.plot(thisx,thisx*slope+intercept)
-        if curr_temp in temp_axis:
-            index = temp_axis.index(curr_temp)
-            slope_axis[index] = slope*-1
-        else:
-            slope_axis.append(slope*-1)
-            temp_axis.append(curr_temp)
+        data[fileName] = [curr_temp,slope*(-1)]
+        print(data)
+        x_ax , y_ax = zip(*data.values())
         ax2.cla()
-        ax2.scatter(temp_axis,slope_axis)
+        ax2.scatter(x_ax,y_ax)
+        ax2.set_xlim(330,350)
         fig.canvas.draw()
 
 # Set useblit=True on most backends for enhanced performance.
