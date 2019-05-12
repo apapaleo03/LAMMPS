@@ -68,30 +68,49 @@ run_options = tkinter.OptionMenu(root,run_var,*run_choices)
 
 def run_callback(*args):
     global all_runs
-    curr_param = param_var.get()
+    curr_y_param = y_param_var.get()
+    curr_x_param = x_param_var.get()
     header = list(all_runs[run_var.get()])
-    if curr_param not in header:
-        curr_param =  'Step'
-    param_var.set(curr_param)
-    param_options['menu'].delete(0,'end')
-    for param in header:
-        param_options['menu'].add_command(label=param, command=tkinter._setit(param_var,param))
+
+    if curr_y_param not in header:
+        curr_y_param =  'Step'
+    y_param_var.set(curr_y_param)
+    y_param_options['menu'].delete(0,'end')
+    for y_param in header:
+        y_param_options['menu'].add_command(label=y_param, command=tkinter._setit(y_param_var,y_param))
+
+    if curr_x_param not in header:
+        curr_x_param =  'Step'
+    x_param_var.set(curr_x_param)
+    x_param_options['menu'].delete(0,'end')
+    for x_param in header:
+        x_param_options['menu'].add_command(label=x_param, command=tkinter._setit(x_param_var,x_param))
+
     plot()
 
 run_var.trace('w',run_callback)
 
-################### Update param options ###################
+################### Update  x_param options ###################
 #                  ----------------------
 
-param_choices = (' ')
-param_var = tkinter.StringVar(root)
-param_var.set('')
-param_options = tkinter.OptionMenu(root,param_var,*param_choices)
+x_param_choices = (' ')
+x_param_var = tkinter.StringVar(root)
+x_param_var.set('')
+x_param_options = tkinter.OptionMenu(root,x_param_var,*x_param_choices)
 
 def callback(*args):
     plot()
 
-param_var.trace('w',callback)
+x_param_var.trace('w',callback)
+
+################### Update  y_param options ###################
+#                  ----------------------
+
+y_param_choices = (' ')
+y_param_var = tkinter.StringVar(root)
+y_param_var.set('')
+y_param_options = tkinter.OptionMenu(root,y_param_var,*y_param_choices)
+y_param_var.trace('w',callback)
 
 ################### Update plotting options ###################
 #    
@@ -153,10 +172,15 @@ def read_log():
         run_options['menu'].add_command(label=run, command=tkinter._setit(run_var,run))
 
     header = list(all_runs[run_var.get()])
-    param_var.set(header[0])
-    param_options['menu'].delete(0,'end')
-    for param in header:
-        param_options['menu'].add_command(label=param, command=tkinter._setit(param_var,param))
+    y_param_var.set(header[0])
+    y_param_options['menu'].delete(0,'end')
+    for y_param in header:
+        y_param_options['menu'].add_command(label=y_param, command=tkinter._setit(y_param_var,y_param))
+
+    x_param_var.set(header[0])
+    x_param_options['menu'].delete(0,'end')
+    for x_param in header:
+        x_param_options['menu'].add_command(label=x_param, command=tkinter._setit(x_param_var,x_param))
 
 file_button = tkinter.Button(master=root, text="Pick a File", command=read_log)
 
@@ -169,25 +193,25 @@ def plot():
     global all_runs
     if file_loaded:
         ax.cla()
-        xdata = all_runs[run_var.get()]['Step']
-        ydata = all_runs[run_var.get()][param_var.get()]
+        xdata = all_runs[run_var.get()][x_param_var.get()]
+        ydata = all_runs[run_var.get()][y_param_var.get()]
         if plot_var.get() == 'Line':
             ax.plot(xdata,ydata)
-            ax.set_title(param_var.get()+' vs. Step')
-            ax.set_xlabel('Step')
-            ax.set_ylabel(param_var.get())
+            ax.set_title(y_param_var.get()+' vs. '+ x_param_var.get())
+            ax.set_xlabel(x_param_var.get())
+            ax.set_ylabel(y_param_var.get())
             line_plot = True
         elif plot_var.get() == 'Scatter':
             ax.scatter(xdata,ydata)
-            ax.set_title(param_var.get()+' vs. Step')
-            ax.set_xlabel('Step')
-            ax.set_ylabel(param_var.get())
+            ax.set_title(y_param_var.get()+' vs. ' + x_param_var.get())
+            ax.set_xlabel(x_param_var.get())
+            ax.set_ylabel(y_param_var.get())
             line_plot = True
         else:
             ax.hist(ydata,bins = 100)
             line_plot = False
-            ax.set_title(param_var.get())
-            ax.set_xlabel(param_var.get())
+            ax.set_title(y_param_var.get())
+            ax.set_xlabel(y_param_var.get())
             ax.set_ylabel('Freq')
         canvas.draw()
 
@@ -200,11 +224,11 @@ def onselect(xmin, xmax):
     global all_runs
     if file_loaded and line_plot:
         plot()
-        indmin, indmax = np.searchsorted(all_runs[run_var.get()]['Step'], (xmin, xmax))
-        indmax = min(len(all_runs[run_var.get()]['Step']) - 1, indmax)
+        indmin, indmax = np.searchsorted(all_runs[run_var.get()][x_param_var.get()], (xmin, xmax))
+        indmax = min(len(all_runs[run_var.get()][x_param_var.get()]) - 1, indmax)
 
-        thisx = all_runs[run_var.get()]['Step'][indmin:indmax]
-        thisy = all_runs[run_var.get()][param_var.get()][indmin:indmax]
+        thisx = all_runs[run_var.get()][x_param_var.get()][indmin:indmax]
+        thisy = all_runs[run_var.get()][y_param_var.get()][indmin:indmax]
         slope, intercept, r, p, std = linregress(thisx,thisy)
         print(slope)
         ax.plot(thisx,thisx*slope+intercept)
@@ -223,7 +247,8 @@ span = SpanSelector(ax, onselect, 'horizontal', useblit=True,
 
 plot_options.grid(row=6,column=5)
 quit_button.grid(row=7,column=3)
-param_options.grid(row=6,column=1)
+y_param_options.grid(row=6,column=1)
+x_param_options.grid(row=6,column=4)
 file_button.grid(row=6,column=3)
 run_options.grid(row=6,column=2)
 #ave_label.grid(row=6,column=2)
