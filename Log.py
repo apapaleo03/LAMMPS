@@ -130,6 +130,7 @@ def read_log():
     global log_df
     global file_loaded
     global all_runs
+    all_runs = {}
     file_loaded = True
     filename = askopenfilename()
 
