@@ -39,6 +39,7 @@ line_plot = False
 all_runs = {}
 log_header = []
 log_df = pd.DataFrame(data={'x':[1,2,3],'y':[1,1,1]})
+filename = ''
 
 ################ Key Press for Some Reason #################
 #  
@@ -130,6 +131,7 @@ def read_log():
     global log_df
     global file_loaded
     global all_runs
+    global filename
     all_runs = {}
     file_loaded = True
     filename = askopenfilename()
@@ -184,6 +186,20 @@ def read_log():
         x_param_options['menu'].add_command(label=x_param, command=tkinter._setit(x_param_var,x_param))
 
 file_button = tkinter.Button(master=root, text="Pick a File", command=read_log)
+
+#################### Export X and Y ######################
+# 
+def export():
+        global filename
+        global all_runs
+        global file_loaded
+        xdata = all_runs[run_var.get()][x_param_var.get()]
+        ydata = all_runs[run_var.get()][y_param_var.get()]
+
+        with open(filename+'_'+x_param_var.get()+'_'+y_param_var.get(),'w+') as output:
+            for xdat, ydat in zip(xdata,ydata):
+                output.write(str(xdat)+' '+str(ydat)+'\n')
+export_button = tkinter.Button(master=root, text='Export Data',command=export)
 
 #################### Plot the data ######################
 #     
@@ -252,6 +268,7 @@ y_param_options.grid(row=6,column=1)
 x_param_options.grid(row=6,column=4)
 file_button.grid(row=6,column=3)
 run_options.grid(row=6,column=2)
+export_button.grid(row=7,column=5)
 #ave_label.grid(row=6,column=2)
 #slope_label.pack(side=tkinter.RIGHT)
 
